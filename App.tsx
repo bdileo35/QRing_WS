@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
 import TabNavigator from './src/navigation/TabNavigator';
+import CustomSplash from './src/components/CustomSplash';
 
 // Mantener el splash screen visible mientras inicializamos
 SplashScreen.preventAutoHideAsync();
@@ -26,7 +27,7 @@ export default function App() {
   }, []);
 
   if (!appIsReady) {
-    return null;
+    return <CustomSplash />;
   }
 
   return (
