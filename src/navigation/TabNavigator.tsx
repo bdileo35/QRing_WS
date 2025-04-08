@@ -1,5 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Platform } from 'react-native';
 import InicioScreen from '../screens/InicioScreen';
 import ConfigScreen from '../screens/ConfigScreen';
 import AyudaScreen from '../screens/AyudaScreen';
@@ -19,11 +20,27 @@ const TabNavigator: React.FC = () => {
       screenOptions={{
         header: () => <Header />,
         tabBarStyle: {
-          backgroundColor: '#f5f5f5',
+          backgroundColor: '#ffffff',
+          borderTopWidth: 1,
           borderTopColor: '#e0e0e0',
+          height: 60,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+          paddingTop: 8,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         },
-        tabBarActiveTintColor: '#666666',
+        tabBarActiveTintColor: '#4a90e2',
         tabBarInactiveTintColor: '#999999',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
       }}
     >
       <Tab.Screen 

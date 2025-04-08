@@ -1,22 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
+import ScreenContainer from '../components/ScreenContainer';
 
 const AyudaScreen: React.FC = () => (
-  <View style={styles.screen}>
+  <ScreenContainer>
     <Text style={styles.text}>Pantalla de Ayuda</Text>
-  </View>
+  </ScreenContainer>
 );
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
   text: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#333333',
   },
 });
 
