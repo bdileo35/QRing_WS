@@ -1,23 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
-import * as Progress from 'react-native-progress';
+import { View, Text, StyleSheet, Image, Animated } from 'react-native';
 
 const CustomSplash: React.FC = () => {
-  const [progress, setProgress] = useState(0);
+  const [progress] = useState(new Animated.Value(0));
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress((prevProgress) => {
-        if (prevProgress >= 1) {
-          clearInterval(timer);
-          return 1;
-        }
-        return prevProgress + 0.1;
-      });
-    }, 200);
-
-    return () => clearInterval(timer);
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: 2000,
+      useNativeDriver: false,
+    }).start();
   }, []);
+
+  const width = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
 
   return (
     <View style={styles.container}>
@@ -28,12 +26,9 @@ const CustomSplash: React.FC = () => {
       />
       <Text style={styles.text}>Cargando datos</Text>
       <View style={styles.progressContainer}>
-        <Progress.Bar
-          progress={progress}
-          width={200}
-          color="#666666"
-          unfilledColor="#e0e0e0"
-        />
+        <View style={styles.progressBackground}>
+          <Animated.View style={[styles.progressBar, { width }]} />
+        </View>
       </View>
     </View>
   );
@@ -58,6 +53,17 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     width: 200,
+  },
+  progressBackground: {
+    height: 4,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#666666',
+    borderRadius: 2,
   },
 });
 
