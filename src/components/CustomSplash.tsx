@@ -1,77 +1,77 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, Animated, SafeAreaView } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Text, ActivityIndicator } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { useConfigStorage } from '../hooks/useConfigStorage';
 
-const CustomSplash: React.FC = () => {
-  const [progress] = useState(new Animated.Value(0));
+export default function CustomSplash() {
+    const navigation = useNavigation();
+    const { config } = useConfigStorage();
 
-  useEffect(() => {
-    Animated.timing(progress, {
-      toValue: 1,
-      duration: 2000,
-      useNativeDriver: false,
-    }).start();
-  }, []);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            // Verificar si existe configuración
+            if (!config || !config.whatsapp) {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Main', params: { screen: 'Config' } }],
+                });
+            } else {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Main', params: { screen: 'Inicio' } }],
+                });
+            }
+        }, 2000);
 
-  const width = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
+        return () => clearTimeout(timer);
+    }, [config]);
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Image
-          source={require('../../assets/images/logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text style={styles.text}>Cargando datos...</Text>
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBackground}>
-            <Animated.View style={[styles.progressBar, { width }]} />
-          </View>
+    return (
+        <View style={styles.container}>
+            <View style={styles.logoContainer}>
+                <Text style={styles.title}>QRing</Text>
+                <Text style={styles.subtitle}>Tu timbre inteligente</Text>
+            </View>
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#1a73e8" style={styles.spinner} />
+                <Text style={styles.loadingText}>Verificando configuración...</Text>
+            </View>
         </View>
-      </View>
-    </SafeAreaView>
-  );
-};
+    );
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  logo: {
-    width: 200,
-    height: 100,
-    marginBottom: 30,
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333333',
-    marginBottom: 20,
-  },
-  progressContainer: {
-    width: 250,
-  },
-  progressBackground: {
-    height: 6,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#4a90e2',
-    borderRadius: 3,
-  },
-});
-
-export default CustomSplash; 
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ffffff',
+    },
+    logoContainer: {
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+    title: {
+        fontSize: 48,
+        fontWeight: 'bold',
+        color: '#1a73e8',
+        marginBottom: 10,
+    },
+    subtitle: {
+        fontSize: 18,
+        color: '#5f6368',
+    },
+    loadingContainer: {
+        position: 'absolute',
+        bottom: 50,
+        alignItems: 'center',
+    },
+    spinner: {
+        marginBottom: 10,
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#5f6368',
+    },
+}); 

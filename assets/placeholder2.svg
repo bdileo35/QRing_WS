@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fondo -->
+    <rect width="400" height="400" fill="#f8f9fa"/>
+    
+    <!-- Interior de casa -->
+    <rect width="400" height="400" fill="#e9ecef"/>
+    <rect x="50" y="50" width="300" height="200" fill="#dee2e6"/>
+    <rect x="70" y="70" width="260" height="160" fill="#f8f9fa"/>
+    
+    <!-- Persona -->
+    <g transform="translate(200,180)">
+        <!-- Cuerpo -->
+        <path d="M0 60 Q0 130 0 180" stroke="#202124" stroke-width="25" fill="none"/>
+        <!-- Cabeza -->
+        <circle cx="0" cy="40" r="30" fill="#202124"/>
+        <!-- Pelo -->
+        <path d="M-20 20 Q0 0 20 20" stroke="#202124" stroke-width="15" fill="#202124"/>
+        <!-- Brazo con teléfono -->
+        <path d="M0 80 Q-30 100 -60 120" stroke="#202124" stroke-width="15" fill="none"/>
+        <!-- Teléfono -->
+        <rect x="-80" y="110" width="30" height="50" rx="5" fill="#1a73e8"/>
+    </g>
+    
+    <!-- Notificación de WhatsApp -->
+    <g transform="translate(250,150)">
+        <!-- Globo de mensaje -->
+        <path d="M0 0 L80 0 L80 40 L90 50 L70 40 L0 40 Z" fill="#34a853"/>
+        <!-- Texto -->
+        <text x="10" y="25" font-family="Arial" font-size="12" fill="white">¡Timbre!</text>
+    </g>
+    
+    <!-- Icono de WhatsApp -->
+    <circle cx="320" cy="80" r="20" fill="#34a853"/>
+    <path d="M310 80 L330 80 M320 70 L320 90" stroke="white" stroke-width="3"/>
+</svg> 
