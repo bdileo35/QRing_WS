@@ -110,7 +110,7 @@ export default function ConfigScreen() {
     };
 
     return (
-        <ScreenContainer>
+  <ScreenContainer>
             <ScrollView style={styles.container}>
                 <Surface style={styles.formContainer} elevation={2}>
                     <Text variant="headlineMedium" style={styles.title}>Configuración del Timbre</Text>
@@ -229,8 +229,8 @@ export default function ConfigScreen() {
                     </View>
                 </Surface>
             </ScrollView>
-        </ScreenContainer>
-    );
+  </ScreenContainer>
+);
 }
 
 const styles = StyleSheet.create({
@@ -310,5 +310,5 @@ const styles = StyleSheet.create({
         marginTop: -8,
         marginBottom: 12,
         marginLeft: 8,
-    },
-}); 
+  },
+});
