@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ExpoBasico",
-    "slug": "ExpoBasico",
+    "name": "QRing",
+    "slug": "qring",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
@@ -21,10 +21,18 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#f5f5f5"
-      }
+      },
+      "package": "com.qring.app",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/images/logo.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c81ab11e-8767-43ee-a646-e5dd9c89d66e"
+      }
+    },
+    "owner": "bdileo35"
   }
 }

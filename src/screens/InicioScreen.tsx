@@ -32,32 +32,30 @@ export default function InicioScreen() {
         try {
             if (!labelRef.current) return;
             
-            // Solicitar permisos para acceder a la galería
-            const { status } = await MediaLibrary.requestPermissionsAsync();
-            if (status !== 'granted') {
-                alert('Se necesitan permisos para guardar la imagen en la galería');
+            // Capturar solo el contenido de la etiqueta
+            const uri = await captureRef(labelRef, {
+                format: 'png',
+                quality: 0.9,
+                result: 'tmpfile',
+                width: 600,
+                height: 800
+            });
+            
+            // Verificamos si podemos compartir
+            if (!(await Sharing.isAvailableAsync())) {
+                alert('Lo siento, compartir no está disponible en este dispositivo');
                 return;
             }
-            
-            // Capturar la etiqueta como imagen usando captureRef
-            const uri = await captureRef(labelRef, {
-                format: 'jpg',
-                quality: 1,
-            });
-            
-            // Guardar en la galería usando expo-media-library
-            const asset = await MediaLibrary.createAssetAsync(uri);
-            await MediaLibrary.createAlbumAsync('QRing', asset, false);
-            
+
             // Compartir la imagen
-            await Sharing.shareAsync(uri, {
-                mimeType: 'image/jpeg',
-                dialogTitle: 'Compartir Etiqueta QRing',
-                UTI: 'public.jpeg'
-            });
+            await Sharing.shareAsync(uri);
+
+            // Cerrar el modal después de compartir
+            setPreviewVisible(false);
 
         } catch (error) {
-            console.error('Error al exportar:', error);
+            console.error('Error específico:', error);
+            alert('Error al capturar la imagen. Asegúrese de tener suficiente espacio en el dispositivo.');
         }
     };
 
@@ -140,13 +138,18 @@ export default function InicioScreen() {
                 {/* Etiqueta Normal */}
                 <LabelContent />
 
-                {/* FAB para exportar */}
-                <FAB
-                    icon="share-variant"
-                    style={styles.fab}
-                    onPress={() => setPreviewVisible(true)}
-                    label="Exportar Etiqueta"
-                />
+                {/* Botón de Exportar */}
+                <View style={styles.actionButtons}>
+                    <Button
+                        mode="contained"
+                        onPress={() => setPreviewVisible(true)}
+                        style={styles.actionButton}
+                        labelStyle={styles.actionButtonLabel}
+                        icon="share-variant"
+                    >
+                        Exportar Etiqueta
+                    </Button>
+                </View>
 
                 {/* Modal de Vista Previa */}
                 <Portal>
@@ -161,14 +164,18 @@ export default function InicioScreen() {
                         
                         <ViewShot
                             ref={labelRef}
-                            options={{
-                                fileName: "QRing",
-                                format: "jpg",
-                                quality: 1,
-                            }}
                             style={styles.previewContainer}
                         >
-                            <LabelContent />
+                            <Surface style={[styles.labelCard, {
+                                elevation: 8,
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.3,
+                                shadowRadius: 6,
+                                margin: 16
+                            }]}>
+                                <LabelContent />
+                            </Surface>
                         </ViewShot>
 
                         <View style={styles.modalActions}>
@@ -285,12 +292,21 @@ const styles = StyleSheet.create({
         marginTop: 'auto',
         paddingBottom: 8,
     },
-    fab: {
-        position: 'absolute',
-        margin: 16,
-        right: 0,
-        bottom: 0,
+    actionButtons: {
+        width: '100%',
+        paddingHorizontal: 16,
+        gap: 12,
+        marginTop: 16,
+    },
+    actionButton: {
+        width: '100%',
+        borderRadius: 25,
+        height: 48,
         backgroundColor: '#1a73e8',
+    },
+    actionButtonLabel: {
+        fontSize: 16,
+        fontWeight: '500',
     },
     modalContainer: {
         backgroundColor: 'white',
@@ -305,9 +321,10 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     previewContainer: {
+        backgroundColor: 'white',
+        padding: 16,
         width: '100%',
         alignItems: 'center',
-        backgroundColor: 'white',
     },
     modalActions: {
         flexDirection: 'row',
