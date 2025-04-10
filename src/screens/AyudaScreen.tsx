@@ -17,7 +17,7 @@ const tutorialSteps = [
     {
         title: "Paso 3: Recepción",
         description: "Recibes tu envío después de coordinar con el repartidor",
-        image: require('../../assets/help/step3.png')
+        image: require('../../assets/help/step3.jpg')
     }
 ];
 

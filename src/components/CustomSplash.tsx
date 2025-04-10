@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useConfigStorage } from '../hooks/useConfigStorage';
@@ -29,13 +29,17 @@ export default function CustomSplash() {
 
     return (
         <View style={styles.container}>
-            <View style={styles.logoContainer}>
-                <Text style={styles.title}>QRing</Text>
+            <View style={styles.content}>
                 <Text style={styles.subtitle}>Tu timbre inteligente</Text>
-            </View>
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#1a73e8" style={styles.spinner} />
+                <View style={styles.logoContainer}>
+                    <Image
+                        source={require('../../assets/images/logo.png')}
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                </View>
                 <Text style={styles.loadingText}>Verificando configuración...</Text>
+                <ActivityIndicator size="large" color="#1a73e8" style={styles.spinner} />
             </View>
         </View>
     );
@@ -44,34 +48,39 @@ export default function CustomSplash() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#ffffff',
     },
-    logoContainer: {
+    content: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 40,
-    },
-    title: {
-        fontSize: 48,
-        fontWeight: 'bold',
-        color: '#1a73e8',
-        marginBottom: 10,
+        paddingBottom: 50, // Reducido para compensar la nueva disposición
     },
     subtitle: {
         fontSize: 18,
         color: '#5f6368',
-    },
-    loadingContainer: {
+        fontWeight: '500',
+        marginBottom: 40,
         position: 'absolute',
-        bottom: 50,
-        alignItems: 'center',
+        top: '25%', // Posiciona el subtítulo a 1/4 de la pantalla
     },
-    spinner: {
-        marginBottom: 10,
+    logoContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 200,
+        marginTop: -20, // Ajuste fino para centrar visualmente
+    },
+    logo: {
+        width: 180,
+        height: 180,
     },
     loadingText: {
         fontSize: 16,
         color: '#5f6368',
+        marginTop: 80,
+        marginBottom: 20,
+    },
+    spinner: {
+        transform: [{ scale: 1.2 }], // Hace el spinner un poco más grande
     },
 }); 

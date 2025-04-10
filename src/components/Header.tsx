@@ -50,11 +50,11 @@ const Header: React.FC = () => {
           </View>
           <View style={styles.dateTimeContainer}>
             <View style={styles.dateContainer}>
-              <Ionicons name="calendar" size={18} color="#007AFF" />
+              <Ionicons name="calendar" size={18} color="#1a73e8" />
               <Text style={styles.dateText}>{date}</Text>
             </View>
             <View style={styles.timeContainer}>
-              <Ionicons name="time" size={18} color="#007AFF" />
+              <Ionicons name="time" size={18} color="#1a73e8" />
               <Text style={styles.timeText}>{time}</Text>
             </View>
           </View>
@@ -74,8 +74,10 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   gradient: {
     width: '100%',
@@ -90,13 +92,21 @@ const styles = StyleSheet.create({
   logoContainer: {
     padding: 4,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'white',
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    borderColor: '#1a73e8',
     width: 65,
     height: 65,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#1a73e8',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   logo: {
     width: 150,
@@ -104,35 +114,47 @@ const styles = StyleSheet.create({
   },
   dateTimeContainer: {
     alignItems: 'flex-end',
+    gap: 6,
   },
   dateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    paddingHorizontal: 8,
+    backgroundColor: 'white',
+    paddingHorizontal: 10,
     paddingVertical: 2,
-    borderRadius: 12,
+    borderRadius: 8,
+    width: 110,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#1a73e8',
   },
   timeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    paddingHorizontal: 8,
+    backgroundColor: 'white',
+    paddingHorizontal: 10,
     paddingVertical: 2,
-    borderRadius: 12,
+    borderRadius: 8,
+    width: 110,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#1a73e8',
   },
   dateText: {
     marginLeft: 6,
-    fontSize: 14,
-    color: '#333333',
+    fontSize: 13,
+    color: '#202124',
     fontWeight: '500',
+    width: 65,
+    textAlign: 'center',
   },
   timeText: {
     marginLeft: 6,
-    fontSize: 14,
-    color: '#333333',
+    fontSize: 13,
+    color: '#202124',
     fontWeight: '500',
+    width: 65,
+    textAlign: 'center',
   },
 });
 

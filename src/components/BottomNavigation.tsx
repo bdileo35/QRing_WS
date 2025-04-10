@@ -32,33 +32,39 @@ export default function BottomNavigation() {
                     style={styles.tab}
                     onPress={() => navigateToScreen('Inicio')}
                 >
-                    <Ionicons
-                        name={isRouteActive('Inicio') ? 'home' : 'home-outline'}
-                        size={24}
-                        color={isRouteActive('Inicio') ? '#007AFF' : '#666'}
-                    />
+                    <View style={[styles.iconContainer, isRouteActive('Inicio') && styles.activeIconContainer]}>
+                        <Ionicons
+                            name={isRouteActive('Inicio') ? 'home' : 'home-outline'}
+                            size={24}
+                            color={isRouteActive('Inicio') ? '#1a73e8' : '#5f6368'}
+                        />
+                    </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.tab}
                     onPress={() => navigateToScreen('Config')}
                 >
-                    <Ionicons
-                        name={isRouteActive('Config') ? 'settings' : 'settings-outline'}
-                        size={24}
-                        color={isRouteActive('Config') ? '#007AFF' : '#666'}
-                    />
+                    <View style={[styles.iconContainer, isRouteActive('Config') && styles.activeIconContainer]}>
+                        <Ionicons
+                            name={isRouteActive('Config') ? 'settings' : 'settings-outline'}
+                            size={24}
+                            color={isRouteActive('Config') ? '#1a73e8' : '#5f6368'}
+                        />
+                    </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.tab}
                     onPress={() => navigateToScreen('Ayuda')}
                 >
-                    <Ionicons
-                        name={isRouteActive('Ayuda') ? 'help-circle' : 'help-circle-outline'}
-                        size={24}
-                        color={isRouteActive('Ayuda') ? '#007AFF' : '#666'}
-                    />
+                    <View style={[styles.iconContainer, isRouteActive('Ayuda') && styles.activeIconContainer]}>
+                        <Ionicons
+                            name={isRouteActive('Ayuda') ? 'help-circle' : 'help-circle-outline'}
+                            size={24}
+                            color={isRouteActive('Ayuda') ? '#1a73e8' : '#5f6368'}
+                        />
+                    </View>
                 </TouchableOpacity>
             </View>
         </LinearGradient>
@@ -70,6 +76,14 @@ const styles = StyleSheet.create({
         height: 60,
         borderTopWidth: 1,
         borderTopColor: '#dee2e6',
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: -2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     content: {
         flex: 1,
@@ -82,5 +96,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 8,
+    },
+    iconContainer: {
+        padding: 8,
+        borderRadius: 8,
+    },
+    activeIconContainer: {
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: '#1a73e8',
     }
 });
