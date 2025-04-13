@@ -9,6 +9,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import ScreenContainer from '../components/ScreenContainer';
 import { Portal, Dialog } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -38,33 +39,21 @@ export default function ConfigScreen() {
         }
     }, [config]);
 
-    const formatWhatsAppNumber = (number: string) => {
+    const formatWhatsAppNumber = (text: string) => {
         // Eliminar todo excepto números
-        const cleaned = number.replace(/\D/g, '');
+        const numbers = text.replace(/\D/g, '');
         
         // Si no hay números, retornar vacío
-        if (!cleaned) return '';
-
-        // Si empieza con 549, está completo
-        if (cleaned.startsWith('549')) {
-            return cleaned;
+        if (!numbers) return '';
+        
+        // Formatear según la longitud
+        if (numbers.length <= 2) {
+            return numbers;
+        } else if (numbers.length <= 5) {
+            return `${numbers.slice(0, 2)} ${numbers.slice(2)}`;
+        } else {
+            return `${numbers.slice(0, 2)} ${numbers.slice(2, 5)} ${numbers.slice(5, 13)}`;
         }
-
-        // Si empieza con 54, verificar si sigue un 9
-        if (cleaned.startsWith('54')) {
-            if (cleaned[2] === '9') {
-                return cleaned; // ya tiene el formato correcto
-            }
-            return '549' + cleaned.slice(2);
-        }
-
-        // Si empieza con 9, agregar 54
-        if (cleaned.startsWith('9')) {
-            return '54' + cleaned;
-        }
-
-        // Si no tiene prefijo, agregar 54
-        return '54' + cleaned;
     };
 
     const validateForm = () => {
@@ -113,26 +102,45 @@ export default function ConfigScreen() {
     };
 
     const handleReset = async () => {
-        const success = await saveConfig({
-            whatsapp: '',
-            direccion: {
-                calle: '',
-                altura: '',
-                dpto: ''
-            },
-            mostrarDireccion: true
-        });
-        if (success) {
-            navigation.replace('Inicio');
+        try {
+            // Primero limpiamos AsyncStorage
+            await Promise.all([
+                AsyncStorage.removeItem('@config'),
+                AsyncStorage.removeItem('@inicio_data')
+            ]);
+
+            // Luego reseteamos el estado local
+            const emptyConfig = {
+                whatsapp: '',
+                direccion: {
+                    calle: '',
+                    altura: '',
+                    dpto: ''
+                },
+                mostrarDireccion: true
+            };
+            
+            setFormData(emptyConfig);
+            await saveConfig(emptyConfig);
+            
+            // Cerramos el diálogo
+            setShowResetDialog(false);
+            
+            // Redirigimos a Config
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Config' }],
+            });
+        } catch (error) {
+            console.error('Error al resetear:', error);
         }
-        setShowResetDialog(false);
     };
 
     return (
         <ScreenContainer>
             <ScrollView style={styles.container}>
                 <View style={styles.formContainer}>
-                    <Text variant="headlineMedium" style={styles.mainTitle}>
+                    <Text variant="headlineMedium" style={styles.title}>
                         Configuración
                     </Text>
                     
@@ -156,19 +164,23 @@ export default function ConfigScreen() {
                     </View>
 
                     <View style={styles.section}>
+                        <Text style={styles.boldText}>Número de WhatsApp</Text>
                         <TextInput
                             mode="outlined"
-                            label="Número de WhatsApp"
                             value={formData.whatsapp}
                             onChangeText={(text) => {
-                                setFormData({...formData, whatsapp: text});
+                                const formatted = formatWhatsAppNumber(text);
+                                setFormData({
+                                    ...formData,
+                                    whatsapp: formatted
+                                });
                                 if (errors.whatsapp) setErrors({...errors, whatsapp: undefined});
                             }}
-                            style={[styles.input, styles.compactInput]}
-                            keyboardType="phone-pad"
-                            placeholder="Ej: +54 9 11 1234-5678"
+                            keyboardType="numeric"
+                            maxLength={15}
+                            placeholder="+54 911 XXXX-XXXX"
+                            style={styles.input}
                             error={!!errors.whatsapp}
-                            theme={{ fonts: { bodyLarge: { fontWeight: 'bold' } } }}
                         />
                         {errors.whatsapp && (
                             <Text style={styles.errorText}>{errors.whatsapp}</Text>
@@ -304,17 +316,20 @@ export default function ConfigScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        padding: 8,
     },
     formContainer: {
-        margin: 12,
-        padding: 12,
+        margin: 8,
+        padding: 8,
         borderRadius: 12,
         backgroundColor: 'white',
     },
-    mainTitle: {
-        marginBottom: 16,
-        color: '#1a73e8',
+    title: {
+        fontSize: 24,
         fontWeight: 'bold',
+        color: '#1a73e8',
+        marginTop: 0,
+        marginBottom: 8,
         textAlign: 'center',
     },
     section: {
@@ -405,5 +420,8 @@ const styles = StyleSheet.create({
         marginLeft: 4,
         color: '#1a73e8',
         fontSize: 13,
+    },
+    boldText: {
+        fontWeight: 'bold',
     },
 });
