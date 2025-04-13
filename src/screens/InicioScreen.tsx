@@ -27,8 +27,16 @@ export default function InicioScreen() {
 
     const getWhatsAppUrl = () => {
         if (!config?.whatsapp) return 'https://qring.com';
-        const whatsappNumber = config.whatsapp.replace(/\D/g, '');
-        return whatsappNumber ? `https://wa.me/${whatsappNumber}` : 'https://qring.com';
+        const cleanNumber = config.whatsapp.replace(/\D/g, '');
+        return `https://wa.me/${cleanNumber}`;
+    };
+
+    const formatWhatsAppNumber = (number: string) => {
+        const cleanNumber = number.replace(/\D/g, '');
+        if (cleanNumber.length === 12) { // 54 911 XXXXXXXX
+            return `${cleanNumber.slice(0,2)} ${cleanNumber.slice(2,5)} ${cleanNumber.slice(5)}`;
+        }
+        return number;
     };
 
     const getDireccionCompleta = () => {
@@ -133,6 +141,7 @@ export default function InicioScreen() {
                         value={getWhatsAppUrl()}
                         size={qrSize}
                         backgroundColor="white"
+                        color="black"
                     />
                 </View>
 
@@ -170,6 +179,9 @@ export default function InicioScreen() {
     return (
         <ScreenContainer>
             <View style={[styles.container, { minHeight: height }]}>
+                <Text variant="headlineMedium" style={styles.mainTitle}>
+                    Tu QRing!
+                </Text>
                 {/* Contenedor de Estado */}
                 <Surface 
                     style={[
@@ -191,7 +203,7 @@ export default function InicioScreen() {
                         </Text>
                     </View>
                     <Text variant="displayMedium" style={styles.whatsappNumber}>
-                        {config.whatsapp || 'No configurado'}
+                        {formatWhatsAppNumber(config.whatsapp || 'No configurado')}
                     </Text>
                 </Surface>
 
@@ -218,7 +230,7 @@ export default function InicioScreen() {
                     </Text>
                     <View style={styles.infoBullets}>
                         <Text variant="bodyMedium" style={styles.infoText}>
-                            • Pégala cerca de tu puerta a la altura de los hombros (aprox. 1,60 mts)
+                            • Pégala cerca de tu puerta
                         </Text>
                         <Text variant="bodyMedium" style={styles.infoText}>
                             • Asegúrate que esté en un lugar visible y de fácil acceso
@@ -293,20 +305,26 @@ export default function InicioScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 12,
-        gap: 12,
+        padding: 8,
+        gap: 8,
+    },
+    mainTitle: {
+        marginBottom: 8,
+        color: '#1a73e8',
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
     statusCard: {
         borderRadius: 12,
-        padding: 16,
-        paddingTop: 24,
+        padding: 12,
+        paddingTop: 16,
         backgroundColor: 'white',
         borderWidth: 2,
         position: 'relative',
     },
     statusLabel: {
         position: 'absolute',
-        top: -12,
+        top: -10,
         left: 12,
         flexDirection: 'row',
         alignItems: 'center',
@@ -329,12 +347,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         fontSize: 48,
-        paddingVertical: 8,
+        paddingVertical: 4,
     },
     labelCard: {
         height: 'auto',
         borderRadius: 16,
-        padding: 16,
+        padding: 12,
         backgroundColor: 'white',
         justifyContent: 'flex-start',
         ...Platform.select({
@@ -353,22 +371,30 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 4,
     },
     contentContainer: {
-        paddingVertical: 8,
+        paddingVertical: 4,
         alignItems: 'center',
-        gap: 16,
+        gap: 8,
     },
     title: {
-        color: '#1a73e8',
-        marginHorizontal: 12,
+        fontSize: 24,
         fontWeight: 'bold',
+        color: '#2196F3',
+        marginVertical: 8,
+        textAlign: 'center',
+    },
+    subtitle: {
+        fontSize: 18,
+        color: '#2196F3',
+        marginVertical: 8,
+        textAlign: 'center',
     },
     qrContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 12,
+        padding: 8,
         backgroundColor: 'white',
         borderRadius: 12,
         borderWidth: 1,
@@ -399,8 +425,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
     },
     footerText: {
-        fontWeight: 'bold',
         fontSize: 16,
+        color: '#2196F3',
+        marginVertical: 8,
         textAlign: 'center',
     },
     qrText: {
@@ -414,9 +441,9 @@ const styles = StyleSheet.create({
     },
     actionButtons: {
         width: '100%',
-        paddingHorizontal: 16,
+        paddingHorizontal: 12,
         gap: 12,
-        marginTop: 16,
+        marginTop: 12,
     },
     actionButton: {
         width: '100%',
@@ -462,9 +489,9 @@ const styles = StyleSheet.create({
         bottom: 0,
     },
     infoCard: {
-        marginHorizontal: 16,
-        marginTop: 16,
-        padding: 16,
+        marginHorizontal: 8,
+        marginTop: 8,
+        padding: 12,
         borderRadius: 12,
         backgroundColor: '#E8F0FE',
     },
@@ -474,7 +501,7 @@ const styles = StyleSheet.create({
         lineHeight: 20,
     },
     infoBullets: {
-        marginTop: 8,
+        marginTop: 4,
         gap: 4,
     },
 }); 

@@ -101,24 +101,25 @@ export default function AyudaScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        padding: 12,
         alignItems: 'center',
     },
     mainTitle: {
-        marginBottom: 24,
+        marginBottom: 16,
         color: '#1a73e8',
         fontWeight: 'bold',
+        textAlign: 'center',
     },
     tutorialCard: {
         width: '100%',
-        padding: 20,
+        padding: 12,
         borderRadius: 16,
         backgroundColor: 'white',
     },
     stepIndicator: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginBottom: 24,
+        marginBottom: 16,
         gap: 8,
     },
     dot: {

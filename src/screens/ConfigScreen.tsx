@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import ScreenContainer from '../components/ScreenContainer';
+import { Portal, Dialog } from 'react-native-paper';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -29,6 +30,7 @@ export default function ConfigScreen() {
         calle?: string;
         altura?: string;
     }>({});
+    const [showResetDialog, setShowResetDialog] = useState(false);
 
     useEffect(() => {
         if (config) {
@@ -110,15 +112,32 @@ export default function ConfigScreen() {
         return `https://wa.me/${formattedNumber}`;
     };
 
+    const handleReset = async () => {
+        const success = await saveConfig({
+            whatsapp: '',
+            direccion: {
+                calle: '',
+                altura: '',
+                dpto: ''
+            },
+            mostrarDireccion: true
+        });
+        if (success) {
+            navigation.replace('Inicio');
+        }
+        setShowResetDialog(false);
+    };
+
     return (
         <ScreenContainer>
             <ScrollView style={styles.container}>
-                <Surface style={styles.formContainer} elevation={2}>
-                    <Text variant="headlineMedium" style={styles.title}>Configuración del Timbre</Text>
+                <View style={styles.formContainer}>
+                    <Text variant="headlineMedium" style={styles.mainTitle}>
+                        Configuración
+                    </Text>
                     
                     {/* QR Code Preview */}
                     <View style={styles.qrContainer}>
-                        <Text variant="titleMedium" style={styles.qrTitle}>Vista previa del QR</Text>
                         <Surface style={styles.qrSurface} elevation={4}>
                             {getWhatsAppUrl() ? (
                                 <QRCode
@@ -137,7 +156,6 @@ export default function ConfigScreen() {
                     </View>
 
                     <View style={styles.section}>
-                        <Text variant="titleMedium" style={styles.sectionTitle}>WhatsApp</Text>
                         <TextInput
                             mode="outlined"
                             label="Número de WhatsApp"
@@ -146,10 +164,11 @@ export default function ConfigScreen() {
                                 setFormData({...formData, whatsapp: text});
                                 if (errors.whatsapp) setErrors({...errors, whatsapp: undefined});
                             }}
-                            style={styles.input}
+                            style={[styles.input, styles.compactInput]}
                             keyboardType="phone-pad"
                             placeholder="Ej: +54 9 11 1234-5678"
                             error={!!errors.whatsapp}
+                            theme={{ fonts: { bodyLarge: { fontWeight: 'bold' } } }}
                         />
                         {errors.whatsapp && (
                             <Text style={styles.errorText}>{errors.whatsapp}</Text>
@@ -245,74 +264,39 @@ export default function ConfigScreen() {
                     </View>
 
                     <View style={styles.buttonContainer}>
-                        <Button
-                            mode="contained"
+                        <Button 
+                            mode="outlined" 
+                            onPress={() => setShowResetDialog(true)}
+                            style={[styles.button, styles.resetButton]}
+                            labelStyle={[styles.buttonLabel, styles.resetButtonLabel]}
+                        >
+                            Reset
+                        </Button>
+                        <Button 
+                            mode="contained" 
                             onPress={handleSave}
                             style={styles.button}
-                            contentStyle={styles.buttonContent}
+                            labelStyle={styles.buttonLabel}
                         >
                             Guardar
                         </Button>
-                        
-                        <Button
-                            mode="outlined"
-                            onPress={() => {
-                                Alert.alert(
-                                    'Restablecer Configuración',
-                                    '¿Estás seguro que deseas borrar toda la configuración? Esta acción no se puede deshacer.',
-                                    [
-                                        {
-                                            text: 'Cancelar',
-                                            style: 'cancel'
-                                        },
-                                        {
-                                            text: 'Restablecer',
-                                            style: 'destructive',
-                                            onPress: async () => {
-                                                const success = await clearConfig();
-                                                if (success) {
-                                                    setFormData({
-                                                        whatsapp: '',
-                                                        direccion: {
-                                                            calle: '',
-                                                            altura: '',
-                                                            dpto: ''
-                                                        },
-                                                        mostrarDireccion: true
-                                                    });
-                                                    Alert.alert(
-                                                        'Configuración Restablecida',
-                                                        'Por favor, ingresa los nuevos datos de configuración.',
-                                                        [
-                                                            {
-                                                                text: 'OK',
-                                                                onPress: () => {
-                                                                    // Limpiar errores también
-                                                                    setErrors({});
-                                                                }
-                                                            }
-                                                        ]
-                                                    );
-                                                } else {
-                                                    Alert.alert(
-                                                        'Error',
-                                                        'No se pudo restablecer la configuración'
-                                                    );
-                                                }
-                                            }
-                                        }
-                                    ]
-                                );
-                            }}
-                            style={[styles.button, { marginTop: 12 }]}
-                            contentStyle={styles.buttonContent}
-                            textColor="#B00020"
-                        >
-                            Restablecer Configuración
-                        </Button>
                     </View>
-                </Surface>
+                </View>
             </ScrollView>
+
+            {/* Reset Confirmation Dialog */}
+            <Portal>
+                <Dialog visible={showResetDialog} onDismiss={() => setShowResetDialog(false)}>
+                    <Dialog.Title>¿Estás seguro?</Dialog.Title>
+                    <Dialog.Content>
+                        <Text>Esta acción eliminará todos los datos configurados y no se puede deshacer.</Text>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={() => setShowResetDialog(false)}>Cancelar</Button>
+                        <Button onPress={handleReset} textColor="#d32f2f">Reset</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
         </ScreenContainer>
     );
 }
@@ -327,16 +311,14 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: 'white',
     },
-    title: {
-        textAlign: 'center',
-        marginBottom: 12,
+    mainTitle: {
+        marginBottom: 16,
         color: '#1a73e8',
-        fontSize: 28,
         fontWeight: 'bold',
-        letterSpacing: 0.5,
+        textAlign: 'center',
     },
     section: {
-        marginBottom: 12,
+        marginBottom: 16,
     },
     sectionHeader: {
         flexDirection: 'row',
@@ -351,14 +333,15 @@ const styles = StyleSheet.create({
     input: {
         marginBottom: 8,
         backgroundColor: 'white',
+        height: 48,
+    },
+    compactInput: {
+        height: 40,
+        paddingVertical: 0,
     },
     qrContainer: {
         alignItems: 'center',
-        marginBottom: 12,
-    },
-    qrTitle: {
-        marginBottom: 8,
-        color: '#5f6368',
+        marginBottom: 16,
     },
     qrSurface: {
         padding: 8,
@@ -379,14 +362,23 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
     },
     buttonContainer: {
-        marginTop: 12,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         gap: 8,
+        marginTop: 8,
     },
     button: {
+        flex: 1,
         borderRadius: 8,
     },
-    buttonContent: {
-        height: 48,
+    resetButton: {
+        borderColor: '#d32f2f',
+    },
+    resetButtonLabel: {
+        color: '#d32f2f',
+    },
+    buttonLabel: {
+        fontWeight: 'bold',
     },
     rowContainer: {
         flexDirection: 'row',
