@@ -1,0 +1,31 @@
+rootProject.name = 'QRing'
+
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url "$rootDir/../node_modules/react-native/android"
+        }
+        maven {
+            url "$rootDir/../node_modules/jsc-android/dist"
+        }
+        maven {
+            url "$rootDir/../node_modules/expo/android/maven"
+        }
+    }
+}
+
+include ':app'
+
+apply from: new File(rootProject.projectDir, '../node_modules/expo/scripts/autolinking.gradle')
+useExpoModules()

@@ -26,23 +26,22 @@ export default function InicioScreen() {
     }, []);
 
     const getWhatsAppUrl = () => {
-        if (!config?.whatsapp) return 'https://qring.com';
-        const cleanNumber = config.whatsapp.replace(/\D/g, '');
-        return `https://wa.me/${cleanNumber}`;
+        // Para capturas de pantalla, usamos un número de ejemplo
+        return 'https://wa.me/5491112345678';
+    };
+
+    const getDemoNumber = () => {
+        return '54 911 12345678';
     };
 
     const formatWhatsAppNumber = (number: string) => {
-        const cleanNumber = number.replace(/\D/g, '');
-        if (cleanNumber.length === 12) { // 54 911 XXXXXXXX
-            return `${cleanNumber.slice(0,2)} ${cleanNumber.slice(2,5)} ${cleanNumber.slice(5)}`;
-        }
-        return number;
+        // Siempre mostramos el número difuminado para capturas
+        return '54 911 XXXX-XXXX';
     };
 
     const getDireccionCompleta = () => {
-        if (!config?.direccion) return 'Dirección no configurada';
-        const { calle = '', altura = '', dpto = '' } = config.direccion;
-        return `${calle} ${altura}${dpto ? ` - ${dpto}` : ''}`.trim() || 'Dirección no configurada';
+        // Para capturas de pantalla, usamos una dirección de ejemplo
+        return 'Tilcara 2306 - 4D';
     };
 
     const captureAndShare = async () => {
@@ -143,14 +142,14 @@ export default function InicioScreen() {
                         backgroundColor="white"
                         color="black"
                     />
-                </View>
-
+    </View>
+    
                 {config?.mostrarDireccion && (
                     <View style={[styles.direccionContainer, { width: qrSize }]}>
                         <Text variant="titleLarge" style={styles.direccionLabel}>
                             {getDireccionCompleta()}
-                        </Text>
-                    </View>
+      </Text>
+    </View>
                 )}
 
                 <View style={styles.footerContainer}>
@@ -158,8 +157,8 @@ export default function InicioScreen() {
                         <Text style={styles.qrText}>QR</Text>
                         <Text style={styles.ingText}>ing</Text>
                         <Text style={styles.versionText}> 2.0</Text>
-                    </Text>
-                </View>
+      </Text>
+    </View>
             </View>
         </Surface>
     );
@@ -172,8 +171,8 @@ export default function InicioScreen() {
                         <Text>Por favor, configure su QRing</Text>
                     </Surface>
                 </View>
-            </ScreenContainer>
-        );
+  </ScreenContainer>
+);
     }
 
     return (
@@ -348,6 +347,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 48,
         paddingVertical: 4,
+        letterSpacing: 2,
     },
     labelCard: {
         height: 'auto',
@@ -377,15 +377,15 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         alignItems: 'center',
         gap: 8,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
         color: '#2196F3',
         marginVertical: 8,
         textAlign: 'center',
-    },
-    subtitle: {
+  },
+  subtitle: {
         fontSize: 18,
         color: '#2196F3',
         marginVertical: 8,
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#1a73e8',
     },
     actionButtonLabel: {
-        fontSize: 16,
+    fontSize: 16,
         fontWeight: '500',
     },
     modalContainer: {
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalTitle: {
-        marginBottom: 20,
+    marginBottom: 20,
         color: '#202124',
         textAlign: 'center',
     },
@@ -497,11 +497,11 @@ const styles = StyleSheet.create({
     },
     infoText: {
         color: '#1967D2',
-        fontSize: 14,
-        lineHeight: 20,
-    },
+    fontSize: 14,
+    lineHeight: 20,
+  },
     infoBullets: {
         marginTop: 4,
         gap: 4,
     },
-}); 
+});

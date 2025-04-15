@@ -13,6 +13,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+type ErrorType = {
+  whatsapp?: string;
+  calle?: string;
+  altura?: string;
+  dpto?: string;
+};
+
 export default function ConfigScreen() {
     const { config, saveConfig, clearConfig } = useConfigStorage();
     const navigation = useNavigation<NavigationProp>();
@@ -26,11 +33,7 @@ export default function ConfigScreen() {
         },
         mostrarDireccion: true
     });
-    const [errors, setErrors] = useState<{
-        whatsapp?: string;
-        calle?: string;
-        altura?: string;
-    }>({});
+    const [errors, setErrors] = useState<ErrorType>({});
     const [showResetDialog, setShowResetDialog] = useState(false);
 
     useEffect(() => {
@@ -137,11 +140,11 @@ export default function ConfigScreen() {
     };
 
     return (
-        <ScreenContainer>
+  <ScreenContainer>
             <ScrollView style={styles.container}>
                 <View style={styles.formContainer}>
                     <Text variant="headlineMedium" style={styles.title}>
-                        Configuración
+                        Configuración del Timbre
                     </Text>
                     
                     {/* QR Code Preview */}
@@ -178,7 +181,7 @@ export default function ConfigScreen() {
                             }}
                             keyboardType="numeric"
                             maxLength={15}
-                            placeholder="+54 911 XXXX-XXXX"
+                            placeholder="54 911 XXXX-XXXX"
                             style={styles.input}
                             error={!!errors.whatsapp}
                         />
@@ -309,8 +312,8 @@ export default function ConfigScreen() {
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
-        </ScreenContainer>
-    );
+  </ScreenContainer>
+);
 }
 
 const styles = StyleSheet.create({
@@ -422,6 +425,6 @@ const styles = StyleSheet.create({
         fontSize: 13,
     },
     boldText: {
-        fontWeight: 'bold',
-    },
+    fontWeight: 'bold',
+  },
 });
