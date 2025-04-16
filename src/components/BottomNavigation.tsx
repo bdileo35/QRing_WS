@@ -43,6 +43,19 @@ export default function BottomNavigation() {
 
                 <TouchableOpacity
                     style={styles.tab}
+                    onPress={() => navigateToScreen('Historial')}
+                >
+                    <View style={[styles.iconContainer, isRouteActive('Historial') && styles.activeIconContainer]}>
+                        <Ionicons
+                            name={isRouteActive('Historial') ? 'time' : 'time-outline'}
+                            size={24}
+                            color={isRouteActive('Historial') ? '#1a73e8' : '#5f6368'}
+                        />
+                    </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.tab}
                     onPress={() => navigateToScreen('Config')}
                 >
                     <View style={[styles.iconContainer, isRouteActive('Config') && styles.activeIconContainer]}>
