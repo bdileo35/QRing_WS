@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { TextInput, Button, Text, Surface, useTheme, Checkbox } from 'react-native-paper';
+import { TextInput, Button, Text, Surface, useTheme, Checkbox, RadioButton, List, Divider } from 'react-native-paper';
 import { useConfigStorage } from '../hooks/useConfigStorage';
 import { ConfigData } from '../types/config';
 import QRCode from 'react-native-qrcode-svg';
@@ -11,8 +11,13 @@ import ScreenContainer from '../components/ScreenContainer';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+const COMMUNICATION_TYPES = {
+    DIRECT_CALL: 'direct_call',
+    WHATSAPP: 'whatsapp'
+} as const;
+
 export default function ConfigScreen() {
-    const { config, saveConfig, clearConfig } = useConfigStorage();
+    const { config, saveConfig, clearConfig, updateConfig } = useConfigStorage();
     const navigation = useNavigation<NavigationProp>();
     const theme = useTheme();
     const [formData, setFormData] = useState<ConfigData>({
@@ -22,7 +27,8 @@ export default function ConfigScreen() {
             altura: '',
             dpto: ''
         },
-        mostrarDireccion: true
+        mostrarDireccion: true,
+        communicationType: COMMUNICATION_TYPES.DIRECT_CALL
     });
     const [errors, setErrors] = useState<{
         whatsapp?: string;
@@ -110,8 +116,12 @@ export default function ConfigScreen() {
         return `https://wa.me/${formattedNumber}`;
     };
 
+    const handleCommunicationTypeChange = (type: string) => {
+        updateConfig({ ...formData, communicationType: type });
+    };
+
     return (
-        <ScreenContainer>
+  <ScreenContainer>
             <ScrollView style={styles.container}>
                 <Surface style={styles.formContainer} elevation={2}>
                     <Text variant="headlineMedium" style={styles.title}>Configuración del Timbre</Text>
@@ -244,6 +254,52 @@ export default function ConfigScreen() {
                         </View>
                     </View>
 
+                    <View style={styles.section}>
+                        <Text variant="titleMedium" style={styles.sectionTitle}>
+                            Modo de Comunicación
+                        </Text>
+                        
+                        <RadioButton.Group
+                            value={formData.communicationType}
+                            onValueChange={handleCommunicationTypeChange}
+                        >
+                            <List.Section>
+                                <List.Item
+                                    title="Llamada Directa"
+                                    description="Llamada telefónica inmediata al escanear"
+                                    left={props => <RadioButton {...props} value={COMMUNICATION_TYPES.DIRECT_CALL} />}
+                                />
+                                <Divider />
+                                <List.Item
+                                    title="WhatsApp"
+                                    description="Contacto directo por WhatsApp al escanear"
+                                    left={props => <RadioButton {...props} value={COMMUNICATION_TYPES.WHATSAPP} />}
+                                />
+                            </List.Section>
+                        </RadioButton.Group>
+
+                        <View style={styles.advantagesContainer}>
+                            <Text variant="titleSmall" style={styles.advantagesTitle}>
+                                Ventajas del modo seleccionado:
+                            </Text>
+                            {(formData.communicationType === COMMUNICATION_TYPES.WHATSAPP ? [
+                                "Mensajes de texto adicionales",
+                                "Confirmación de lectura",
+                                "Envío de fotos/videos",
+                                "Comunicación gratuita por internet"
+                            ] : [
+                                "Conexión telefónica inmediata",
+                                "No requiere WhatsApp instalado",
+                                "Compatible con cualquier teléfono",
+                                "Ideal para timbres de emergencia"
+                            ]).map((advantage, index) => (
+                                <Text key={index} style={styles.advantageItem}>
+                                    • {advantage}
+                                </Text>
+                            ))}
+                        </View>
+                    </View>
+
                     <View style={styles.buttonContainer}>
                         <Button
                             mode="contained"
@@ -278,7 +334,8 @@ export default function ConfigScreen() {
                                                             altura: '',
                                                             dpto: ''
                                                         },
-                                                        mostrarDireccion: true
+                                                        mostrarDireccion: true,
+                                                        communicationType: COMMUNICATION_TYPES.DIRECT_CALL
                                                     });
                                                     Alert.alert(
                                                         'Configuración Restablecida',
@@ -313,8 +370,8 @@ export default function ConfigScreen() {
                     </View>
                 </Surface>
             </ScrollView>
-        </ScreenContainer>
-    );
+  </ScreenContainer>
+);
 }
 
 const styles = StyleSheet.create({
@@ -332,7 +389,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         color: '#1a73e8',
         fontSize: 28,
-        fontWeight: 'bold',
+    fontWeight: 'bold',
         letterSpacing: 0.5,
     },
     section: {
@@ -414,4 +471,19 @@ const styles = StyleSheet.create({
         color: '#1a73e8',
         fontSize: 13,
     },
+    advantagesContainer: {
+        marginTop: 24,
+        padding: 16,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 8,
+    },
+    advantagesTitle: {
+        marginBottom: 12,
+        color: '#202124',
+    },
+    advantageItem: {
+        marginBottom: 8,
+        color: '#5f6368',
+        fontSize: 14,
+  },
 });

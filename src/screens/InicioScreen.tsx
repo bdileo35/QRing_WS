@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, useWindowDimensions, Platform, Alert } from 'react-native';
-import { Text, Surface, IconButton, Portal, Modal, Button, FAB } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, useWindowDimensions, Platform, Alert, TouchableOpacity } from 'react-native';
+import { Text, Surface, IconButton, Portal, Modal, Button, FAB, TextInput, Provider as PaperProvider } from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
 import { useConfigStorage } from '../hooks/useConfigStorage';
 import ScreenContainer from '../components/ScreenContainer';
@@ -8,6 +8,83 @@ import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
+
+// Mock data - Luego vendrá de la configuración real
+const MOCK_DATA = {
+    numeroPrincipal: '+54 911 1234-5678',
+    numeroBackup: '+54 911 8765-4321',
+    estadoPrincipal: true, // true = activo, false = DND
+    backupActivo: true
+};
+
+// Mock data para las últimas llamadas
+const MOCK_CALLS = [
+    {
+        type: 'incoming',
+        number: '+54 911 2345-6789',
+        time: 'Hace 5 min',
+        duration: '1:23'
+    },
+    {
+        type: 'outgoing',
+        number: '+54 911 3456-7890',
+        time: 'Hace 15 min',
+        duration: '2:45'
+    },
+    {
+        type: 'incoming',
+        number: '+54 911 4567-8901',
+        time: 'Hace 30 min',
+        duration: '0:45'
+    }
+];
+
+// Tipos de comunicación
+const COMMUNICATION_TYPES = {
+    DIRECT_CALL: 'direct_call',
+    WHATSAPP: 'whatsapp'
+} as const;
+
+// Ventajas de cada modo
+const ADVANTAGES = {
+    [COMMUNICATION_TYPES.DIRECT_CALL]: [
+        "Conexión telefónica inmediata",
+        "No requiere WhatsApp instalado",
+        "Compatible con cualquier teléfono",
+        "Ideal para timbres de emergencia"
+    ],
+    [COMMUNICATION_TYPES.WHATSAPP]: [
+        "Mensajes de texto adicionales",
+        "Confirmación de lectura",
+        "Envío de fotos/videos",
+        "Comunicación gratuita por internet"
+    ]
+};
+
+// Función para generar datos de llamada
+const generateCallData = (phoneNumber: string) => {
+    const callData = {
+        type: 'phone_call',
+        phoneNumber: phoneNumber,
+        timestamp: Date.now(),
+        // En producción, esto debería ser una firma real
+        signature: 'test_signature'
+    };
+    
+    // Convertir a string seguro para QR
+    return JSON.stringify(callData);
+};
+
+// Función para generar URL según el tipo
+const getCallUrl = (config: any) => {
+    const phoneNumber = '1122473759';
+    const communicationType = config?.communicationType || COMMUNICATION_TYPES.DIRECT_CALL;
+
+    if (communicationType === COMMUNICATION_TYPES.WHATSAPP) {
+        return `https://wa.me/54${phoneNumber}`;
+    }
+    return `tel:+54${phoneNumber}`;
+};
 
 export default function InicioScreen() {
     const { config } = useConfigStorage();
@@ -103,133 +180,181 @@ export default function InicioScreen() {
         }
     };
 
-    const LabelContent = ({ isPreview = false }) => (
-        <Surface style={[styles.labelCard, {
-            elevation: 8,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 6,
-            margin: isPreview ? 16 : 0,
-            backgroundColor: 'white',
-        }]} elevation={4}>
-            <View style={styles.header}>
-                <IconButton
-                    icon="bell"
-                    size={32}
-                    iconColor="#1a73e8"
-                />
-                <Text variant="displaySmall" style={styles.title}>TIMBRE</Text>
-                <IconButton
-                    icon="bell"
-                    size={32}
-                    iconColor="#1a73e8"
-                />
-            </View>
-
-            <View style={styles.contentContainer}>
-                <View style={styles.qrContainer}>
-                    <QRCode
-                        value={getWhatsAppUrl()}
-                        size={qrSize}
-                        backgroundColor="white"
-                    />
-                </View>
-
-                {config?.mostrarDireccion && (
-                    <View style={[styles.direccionContainer, { width: qrSize }]}>
-                        <Text variant="titleLarge" style={styles.direccionLabel}>
-                            {getDireccionCompleta()}
-                        </Text>
-                    </View>
-                )}
-
-                <View style={styles.footerContainer}>
-                    <Text variant="titleMedium" style={styles.footerText}>
-                        <Text style={styles.qrText}>QR</Text>
-                        <Text style={styles.ingText}>ing</Text>
-                        <Text style={styles.versionText}> 2.0</Text>
+    const LabelContent = ({ isPreview = false }) => {
+        const { config } = useConfigStorage();
+        const communicationType = config?.communicationType || COMMUNICATION_TYPES.DIRECT_CALL;
+        
+        return (
+            <Surface style={[styles.labelCard, {
+                elevation: 8,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                margin: isPreview ? 16 : 0,
+                backgroundColor: 'white',
+            }]} elevation={4}>
+                <View style={styles.header}>
+                    <Text variant="displaySmall" style={styles.title}>
+                        {communicationType === COMMUNICATION_TYPES.WHATSAPP ? 'WHATSAPP' : 'LLAMADA DIRECTA'}
                     </Text>
                 </View>
-            </View>
-        </Surface>
-    );
+
+                <View style={styles.contentContainer}>
+                    <View style={styles.qrContainer}>
+                        <QRCode
+                            value={getCallUrl(config)}
+                            size={qrSize}
+                            backgroundColor="white"
+                        />
+    </View>
+    
+                    <View style={styles.qrInstructions}>
+                        <Text style={styles.instructionText}>
+                            {communicationType === COMMUNICATION_TYPES.WHATSAPP 
+                                ? 'Escanea para contactar por WhatsApp'
+                                : 'Escanea para llamada directa'}
+                        </Text>
+                        <Text style={[styles.instructionText, { fontSize: 14, color: '#666' }]}>
+                            {communicationType === COMMUNICATION_TYPES.WHATSAPP 
+                                ? 'Se abrirá WhatsApp automáticamente'
+                                : 'La llamada se realizará automáticamente'}
+      </Text>
+    </View>
+
+                    {config?.mostrarDireccion && (
+                        <View style={[styles.direccionContainer, { width: qrSize }]}>
+                            <Text variant="titleLarge" style={styles.direccionLabel}>
+                                {getDireccionCompleta()}
+      </Text>
+    </View>
+                    )}
+
+                    <TouchableOpacity 
+                        style={[styles.footerContainer, {
+                            borderColor: communicationType === COMMUNICATION_TYPES.WHATSAPP ? '#25D366' : '#1a73e8'
+                        }]}
+                        onPress={() => setPreviewVisible(true)}
+                    >
+                        <View style={styles.footerContent}>
+                            <Text style={[styles.footerText, {
+                                color: communicationType === COMMUNICATION_TYPES.WHATSAPP ? '#25D366' : '#1a73e8'
+                            }]}>
+                                Compartir QR
+                            </Text>
+                            <IconButton
+                                icon="share-variant"
+                                size={20}
+                                iconColor={communicationType === COMMUNICATION_TYPES.WHATSAPP ? '#25D366' : '#1a73e8'}
+                                style={styles.shareIcon}
+                            />
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </Surface>
+        );
+    };
 
     if (!config) {
         return (
-            <ScreenContainer>
-                <View style={styles.container}>
-                    <Surface style={styles.statusCard} elevation={4}>
-                        <Text>Por favor, configure su QRing</Text>
-                    </Surface>
-                </View>
-            </ScreenContainer>
+            <PaperProvider>
+                <ScreenContainer>
+                    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+                        <Surface style={styles.statusCard} elevation={4}>
+                            <Text>Por favor, configure su QRing</Text>
+                        </Surface>
+                    </ScrollView>
+  </ScreenContainer>
+            </PaperProvider>
         );
     }
 
     return (
-        <ScreenContainer>
-            <View style={[styles.container, { minHeight: height }]}>
-                {/* Contenedor de Estado */}
-                <Surface 
-                    style={[
-                        styles.statusCard,
-                        { 
-                            borderColor: isActive ? '#34a853' : '#ea4335',
-                            backgroundColor: 'white'
-                        }
-                    ]} 
-                    elevation={4}
-                >
-                    <View style={styles.statusLabel}>
-                        <View style={[styles.statusDot, { backgroundColor: isActive ? '#34a853' : '#ea4335' }]} />
-                        <Text 
-                            variant="labelLarge" 
-                            style={[styles.statusText, { color: isActive ? '#34a853' : '#ea4335' }]}
-                        >
-                            {isActive ? 'ACTIVADO' : 'DESACTIVADO'}
-                        </Text>
-                    </View>
-                    <Text variant="displayMedium" style={styles.whatsappNumber}>
-                        {config.whatsapp || 'No configurado'}
-                    </Text>
-                </Surface>
-
-                {/* Etiqueta Normal */}
-                <LabelContent />
-
-                {/* Botón de Exportar */}
-                <View style={styles.actionButtons}>
-                    <Button
-                        mode="contained"
-                        onPress={() => setPreviewVisible(true)}
-                        style={styles.actionButton}
-                        labelStyle={styles.actionButtonLabel}
-                        icon="share-variant"
+        <PaperProvider>
+            <ScreenContainer>
+                <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+                    {/* Contenedor de Estado */}
+                    <Surface 
+                        style={[styles.statusCard, { borderRadius: 12 }]} 
+                        elevation={4}
                     >
-                        Exportar Etiqueta
-                    </Button>
-                </View>
+                        <Text style={styles.cardLabel}>Números</Text>
+                        {/* Número Principal */}
+                        <TextInput
+                            mode="outlined"
+                            label="Principal"
+                            value={MOCK_DATA.numeroPrincipal}
+                            editable={false}
+                            left={<TextInput.Icon 
+                                icon={MOCK_DATA.estadoPrincipal ? 'bell' : 'bell-off'}
+                                color={MOCK_DATA.estadoPrincipal ? '#34a853' : '#ea4335'}
+                            />}
+                            style={styles.input}
+                            contentStyle={styles.inputContent}
+                            theme={{
+                                roundness: 12,
+                            }}
+                        />
 
-                {/* Mensaje Informativo */}
-                <Surface style={styles.infoCard} elevation={1}>
-                    <Text variant="bodyMedium" style={styles.infoText}>
-                        💡 Después de imprimir tu etiqueta:
-                    </Text>
-                    <View style={styles.infoBullets}>
-                        <Text variant="bodyMedium" style={styles.infoText}>
-                            • Pégala cerca de tu puerta a la altura de los hombros (aprox. 1,60 mts)
-                        </Text>
-                        <Text variant="bodyMedium" style={styles.infoText}>
-                            • Asegúrate que esté en un lugar visible y de fácil acceso
-                        </Text>
-                        <Text variant="bodyMedium" style={styles.infoText}>
-                            • Protégela de la exposición directa al sol y la lluvia
-                        </Text>
-                    </View>
-                </Surface>
+                        {/* Número Backup */}
+                        <TextInput
+                            mode="outlined"
+                            label="Backup"
+                            value={MOCK_DATA.numeroBackup}
+                            editable={false}
+                            left={<TextInput.Icon 
+                                icon={MOCK_DATA.backupActivo ? 'phone-check' : 'phone-off'}
+                                color={MOCK_DATA.backupActivo ? '#34a853' : '#ea4335'}
+                            />}
+                            style={[styles.input, styles.backupInput]}
+                            outlineStyle={[
+                                styles.backupOutline,
+                                { borderColor: MOCK_DATA.backupActivo ? '#34a853' : '#ea4335' }
+                            ]}
+                            contentStyle={styles.inputContent}
+                            theme={{
+                                roundness: 12,
+                            }}
+                        />
+                    </Surface>
 
-                {/* Modal de Vista Previa */}
+                    {/* Últimas Llamadas */}
+                    <Surface 
+                        style={[styles.recentCallsCard, { borderRadius: 12 }]} 
+                        elevation={4}
+                    >
+                        <Text style={styles.cardLabel}>Últimas Llamadas</Text>
+                        <View style={styles.callsList}>
+                            {MOCK_CALLS.map((call, index) => (
+                                <View key={index} style={[
+                                    styles.callItem,
+                                    index === MOCK_CALLS.length - 1 && styles.lastCallItem
+                                ]}>
+                                    <IconButton
+                                        icon={call.type === 'incoming' ? 'phone-incoming' : 'phone-outgoing'}
+                                        size={18}
+                                        iconColor={call.type === 'incoming' ? '#34a853' : '#1a73e8'}
+                                        style={styles.callIcon}
+                                    />
+                                    <View style={styles.callInfo}>
+                                        <Text style={styles.callNumber}>{call.number}</Text>
+                                        <Text style={styles.callTime}>{call.time}</Text>
+                                    </View>
+                                    <Text style={styles.callDuration}>{call.duration}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    </Surface>
+
+                    {/* Etiqueta QR */}
+                    <Surface 
+                        style={[styles.qrCard, { borderRadius: 12 }]} 
+                        elevation={4}
+                    >
+                        <LabelContent />
+                    </Surface>
+                </ScrollView>
+
                 <Portal>
                     <Modal
                         visible={previewVisible}
@@ -237,19 +362,14 @@ export default function InicioScreen() {
                         contentContainerStyle={styles.modalContainer}
                     >
                         <Text variant="titleLarge" style={styles.modalTitle}>
-                            Vista Previa de la Etiqueta
+                            Compartir Etiqueta
                         </Text>
                         
                         <ViewShot
                             ref={labelRef}
-                            style={{
-                                backgroundColor: 'white',
-                                padding: 32,
-                                width: '100%',
-                                alignItems: 'center'
-                            }}
+                            style={styles.previewContainer}
                         >
-                            <LabelContent isPreview={false} />
+                            <LabelContent isPreview={true} />
                         </ViewShot>
 
                         <View style={styles.modalActions}>
@@ -265,7 +385,7 @@ export default function InicioScreen() {
                                 onPress={saveToGallery}
                                 style={styles.modalButton}
                             >
-                                Guardar en Galería
+                                Guardar
                             </Button>
                             <Button 
                                 mode="contained" 
@@ -277,59 +397,144 @@ export default function InicioScreen() {
                         </View>
                     </Modal>
                 </Portal>
-
-                {/* FAB para exportar */}
-                <FAB
-                    icon="share-variant"
-                    style={styles.fab}
-                    onPress={() => setPreviewVisible(true)}
-                    label="Compartir Etiqueta"
-                />
-            </View>
-        </ScreenContainer>
+            </ScreenContainer>
+        </PaperProvider>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    scrollView: {
         flex: 1,
+    },
+    scrollContent: {
         padding: 12,
-        gap: 12,
+        paddingBottom: 80,
+        gap: 16,
     },
     statusCard: {
-        borderRadius: 12,
-        padding: 16,
-        paddingTop: 24,
+        padding: 12,
+        paddingTop: 20,
         backgroundColor: 'white',
-        borderWidth: 2,
+        gap: 8,
         position: 'relative',
+        marginTop: 4,
     },
-    statusLabel: {
+    input: {
+        backgroundColor: 'white',
+    },
+    inputContent: {
+        fontSize: 16,
+        textAlign: 'right',
+        paddingRight: 12,
+    },
+    backupInput: {
+        marginTop: 4,
+    },
+    backupOutline: {
+        borderStyle: 'dashed',
+        borderWidth: 1,
+    },
+    recentCallsCard: {
+        padding: 12,
+        paddingTop: 20,
+        backgroundColor: 'white',
+        position: 'relative',
+        marginTop: 4,
+    },
+    cardLabel: {
         position: 'absolute',
-        top: -12,
-        left: 12,
+        top: -10,
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+        backgroundColor: 'white',
+        color: '#1a73e8',
+        fontSize: 14,
+        fontWeight: 'bold',
+        alignSelf: 'center',
+        paddingHorizontal: 8,
+        width: 'auto',
+        marginHorizontal: 'auto',
+        zIndex: 1,
+    },
+    callsList: {
+        gap: 2,
+    },
+    callItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'white',
-        paddingHorizontal: 8,
-        gap: 4,
+        paddingVertical: 4,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f1f3f4',
     },
-    statusDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
+    lastCallItem: {
+        borderBottomWidth: 0,
+        paddingBottom: 0,
     },
-    statusText: {
-        fontWeight: 'bold',
-        fontSize: 12,
-        letterSpacing: 0.5,
+    callIcon: {
+        margin: 0,
+        padding: 0,
+        width: 28,
+        height: 28,
     },
-    whatsappNumber: {
+    callInfo: {
+        flex: 1,
+        marginLeft: 4,
+    },
+    callNumber: {
+        fontSize: 13,
         color: '#202124',
-        fontWeight: 'bold',
+        fontWeight: '500',
+    },
+    callTime: {
+        fontSize: 11,
+        color: '#5f6368',
+    },
+    callDuration: {
+        fontSize: 11,
+        color: '#5f6368',
+        marginLeft: 8,
+    },
+    qrCard: {
+        padding: 12,
+        backgroundColor: 'white',
+    },
+    fab: {
+        position: 'absolute',
+        margin: 16,
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#1a73e8',
+    },
+    fabSpace: {
+        height: 68,
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        padding: 20,
+        margin: 20,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    modalTitle: {
+    marginBottom: 20,
+        color: '#202124',
         textAlign: 'center',
-        fontSize: 48,
-        paddingVertical: 8,
+    },
+    previewContainer: {
+        backgroundColor: 'white',
+        padding: 16,
+        width: '100%',
+        alignItems: 'center',
+    },
+    modalActions: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 8,
+        marginTop: 16,
+    },
+    modalButton: {
+        flex: 1,
     },
     labelCard: {
         height: 'auto',
@@ -359,11 +564,11 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         alignItems: 'center',
         gap: 16,
-    },
-    title: {
+  },
+  title: {
         color: '#1a73e8',
         marginHorizontal: 12,
-        fontWeight: 'bold',
+    fontWeight: 'bold',
     },
     qrContainer: {
         alignItems: 'center',
@@ -398,83 +603,28 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         backgroundColor: 'white',
     },
-    footerText: {
-        fontWeight: 'bold',
-        fontSize: 16,
-        textAlign: 'center',
-    },
-    qrText: {
-        color: '#1a73e8',
-    },
-    ingText: {
-        color: '#202124',
-    },
-    versionText: {
-        color: '#5f6368',
-    },
-    actionButtons: {
-        width: '100%',
-        paddingHorizontal: 16,
-        gap: 12,
-        marginTop: 16,
-    },
-    actionButton: {
-        width: '100%',
-        borderRadius: 25,
-        height: 48,
-        backgroundColor: '#1a73e8',
-    },
-    actionButtonLabel: {
-        fontSize: 16,
-        fontWeight: '500',
-    },
-    modalContainer: {
-        backgroundColor: 'white',
-        padding: 20,
-        margin: 20,
-        borderRadius: 12,
-        alignItems: 'center',
-    },
-    modalTitle: {
-        marginBottom: 20,
-        color: '#202124',
-        textAlign: 'center',
-    },
-    previewContainer: {
-        backgroundColor: 'white',
-        padding: 16,
-        width: '100%',
-        alignItems: 'center',
-    },
-    modalActions: {
+    footerContent: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 8,
-        marginTop: 16,
-    },
-    modalButton: {
-        flex: 1,
-    },
-    fab: {
-        position: 'absolute',
-        margin: 16,
-        right: 0,
-        bottom: 0,
-    },
-    infoCard: {
-        marginHorizontal: 16,
-        marginTop: 16,
-        padding: 16,
-        borderRadius: 12,
-        backgroundColor: '#E8F0FE',
-    },
-    infoText: {
-        color: '#1967D2',
-        fontSize: 14,
-        lineHeight: 20,
-    },
-    infoBullets: {
-        marginTop: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
         gap: 4,
     },
-}); 
+    footerText: {
+        fontWeight: 'bold',
+    fontSize: 16,
+        color: '#1a73e8',
+    },
+    shareIcon: {
+        margin: 0,
+        padding: 0,
+    },
+    qrInstructions: {
+        marginTop: 8,
+        alignItems: 'center',
+    },
+    instructionText: {
+        fontSize: 16,
+        color: '#5f6368',
+        fontWeight: '500',
+  },
+});
